@@ -11,7 +11,7 @@ describe("/", () => {
 
   describe.only("/api", () => {
     describe("/topics", () => {
-      it("GET status:200 - responds with array of topic objects", () => {
+      it("GET topics - status:200 - responds with array of topic objects", () => {
         return request(app)
           .get("/api/topics")
           .expect(200)
@@ -41,6 +41,43 @@ describe("/", () => {
           .expect(404)
           .then(({ body }) => {
             expect(body.msg).to.equal("username does not exist");
+          });
+      });
+    });
+    describe("/articles", () => {
+      it("GET /:article_id - status:200 - responds with article object - inc comment_count", () => {
+        return request(app)
+          .get("/api/articles/1")
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article).to.eql({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              body: "I find this existence challenging",
+              votes: 100,
+              topic: "mitch",
+              author: "butter_bridge",
+              created_at: "2018-11-15T12:21:54.171Z",
+              comment_count: "13"
+            });
+          });
+      });
+      it("status: 404 - when given an article_id that does not exist", () => {
+        return request(app)
+          .get("/api/articles/943789")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("article does not exist");
+          });
+      });
+      it("status 400 - when given an invalid article_id", () => {
+        return request(app)
+          .get("/api/articles/notAnId")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              'invalid input syntax for integer: "notAnId"'
+            );
           });
       });
     });

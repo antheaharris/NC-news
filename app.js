@@ -16,4 +16,8 @@ app.all("/*", routeNotFound);
 
 app.use(handleCustomErrors);
 
+app.use(handleSqlErrors);
+
+app.use(handle500);
+
 module.exports = app;
