@@ -35,6 +35,14 @@ describe("/", () => {
             });
           });
       });
+      it("status: 404 - when given a username that doesn't exist", () => {
+        return request(app)
+          .get("/api/users/invalidName")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("username does not exist");
+          });
+      });
     });
   });
 });
