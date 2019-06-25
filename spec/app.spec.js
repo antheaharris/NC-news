@@ -2,9 +2,12 @@ process.env.NODE_ENV = "test";
 
 const chai = require("chai");
 const { expect } = chai;
+const chaiSorted = require("chai-sorted");
 const request = require("supertest");
 const app = require("../app.js");
 const connection = require("../db/connection");
+
+chai.use(chaiSorted);
 
 describe("/", () => {
   beforeEach(() => connection.seed.run());
@@ -16,9 +19,9 @@ describe("/", () => {
         return request(app)
           .get("/api/topics")
           .expect(200)
-          .then(({ body }) => {
-            expect(body.topics).to.be.an("array");
-            expect(body.topics[0]).to.contain.keys("description", "slug");
+          .then(({ body: { topics } }) => {
+            expect(topics).to.be.an("array");
+            expect(topics[0]).to.contain.keys("description", "slug");
           });
       });
     });
@@ -91,8 +94,8 @@ describe("/", () => {
               .patch("/api/articles/1")
               .send({ inc_votes: 1 })
               .expect(200)
-              .then(({ body }) => {
-                expect(body.article.votes).to.equal(101);
+              .then(({ body: { article } }) => {
+                expect(article.votes).to.equal(101);
               });
           });
           it("status 400 - no 'inc_votes' key on request body", () => {
@@ -115,15 +118,6 @@ describe("/", () => {
                 );
               });
           });
-          // it("status 400 - other keys on request body", () => {
-          //   return request(app)
-          //     .patch("/api/articles/1")
-          //     .send({ inc_votes: 1, name: "Mitch" })
-          //     .expect(400)
-          //     .then(({ body }) => {
-          //       expect(body.msg).to.equal("other properties on request body");
-          //     });
-          // });
           it("status: 404 - when given an article_id that does not exist", () => {
             return request(app)
               .patch("/api/articles/943789")
@@ -204,6 +198,24 @@ describe("/", () => {
                   expect(body.msg).to.equal(
                     "no username/body key on comment post request"
                   );
+                });
+            });
+          });
+          describe("GET", () => {
+            it("GET status:200 - responds with an array of comments for the given article_id", () => {
+              return request(app)
+                .get("/api/articles/1/comments")
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments.length).to.equal(13);
+                });
+            });
+            it("GET status: 200, defaults the response to be sorted by 'created_at' ", () => {
+              return request(app)
+                .get("/api/articles/1/comments")
+                .expect(200)
+                .then(({ body: { comments } }) => {
+                  expect(comments).to.be.sortedBy("created_at");
                 });
             });
           });

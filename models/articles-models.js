@@ -23,3 +23,12 @@ exports.postComment = (article_id, newComment) => {
     .returning("*")
     .then(([comment]) => comment);
 };
+
+exports.selectAllCommentsByArticleId = article_id => {
+  return connection("comments")
+    .select("comments.*")
+    .where({ "comments.article_id": article_id })
+    .join("articles", "comments.article_id", "=", "articles.article_id")
+    .orderBy("created_at")
+    .then(comments => comments);
+};

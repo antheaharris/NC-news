@@ -1,7 +1,8 @@
 const {
   selectByArticleId,
   updateArticleById,
-  postComment
+  postComment,
+  selectAllCommentsByArticleId
 } = require("../models/articles-models");
 
 exports.sendByArticleId = (req, res, next) => {
@@ -60,4 +61,13 @@ exports.postCommentByArticleId = (req, res, next) => {
     .catch(err => {
       next(err);
     });
+};
+
+exports.sendCommentsByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+  selectAllCommentsByArticleId(article_id)
+    .then(comments => {
+      res.status(200).send({ comments });
+    })
+    .catch(err => console.log(err));
 };
