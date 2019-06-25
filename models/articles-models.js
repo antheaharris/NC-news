@@ -8,3 +8,18 @@ exports.selectByArticleId = article_id => {
     .groupBy("articles.article_id")
     .where({ "articles.article_id": article_id });
 };
+
+exports.updateArticleById = (article_id, inc_votes) => {
+  //   const { inc_votes } = request_body;
+  return connection("articles")
+    .where({ "articles.article_id": article_id })
+    .increment("votes", inc_votes)
+    .returning("*");
+};
+
+exports.postComment = (article_id, newComment) => {
+  return connection("comments")
+    .insert({ ...newComment, article_id })
+    .returning("*")
+    .then(([comment]) => comment);
+};

@@ -3,7 +3,7 @@ const apiRouter = require("./routes/api");
 const app = express();
 const {
   routeNotFound,
-  handle500,
+  handleServerError,
   handleCustomErrors,
   handleSqlErrors
 } = require("./errors");
@@ -18,6 +18,6 @@ app.use(handleCustomErrors);
 
 app.use(handleSqlErrors);
 
-app.use(handle500);
+app.use(handleServerError);
 
 module.exports = app;
