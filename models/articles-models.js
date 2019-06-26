@@ -10,7 +10,6 @@ exports.selectByArticleId = article_id => {
 };
 
 exports.updateArticleById = (article_id, inc_votes) => {
-  //   const { inc_votes } = request_body;
   return connection("articles")
     .where({ "articles.article_id": article_id })
     .increment("votes", inc_votes)
@@ -24,11 +23,31 @@ exports.postComment = (article_id, newComment) => {
     .then(([comment]) => comment);
 };
 
-exports.selectAllCommentsByArticleId = article_id => {
+exports.selectAllCommentsByArticleId = (
+  article_id,
+  { sort_by = "created_at", order = "desc" }
+) => {
   return connection("comments")
     .select("comments.*")
     .where({ "comments.article_id": article_id })
     .join("articles", "comments.article_id", "=", "articles.article_id")
-    .orderBy("created_at")
+    .orderBy(sort_by, order)
     .then(comments => comments);
+};
+
+exports.selectAllArticles = ({ sort_by = "created_at", order = "desc" }) => {
+  return connection("articles")
+    .select(
+      "articles.author",
+      "articles.title",
+      "articles.article_id",
+      "articles.topic",
+      "articles.created_at",
+      "articles.votes"
+    )
+    .count({ comment_count: "comment_id" })
+    .leftJoin("comments", "comments.article_id", "articles.article_id")
+    .groupBy("articles.article_id")
+    .orderBy(sort_by, order)
+    .then(articles => articles);
 };
