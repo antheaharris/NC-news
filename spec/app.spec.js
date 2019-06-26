@@ -49,6 +49,56 @@ describe("/", () => {
       });
     });
     describe("/articles", () => {
+      describe("GET", () => {
+        it("GET status:200 - responds with array of article object, inc comment_count property", () => {
+          return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then(({ body: { articles } }) => {
+              expect(articles[0]).to.contain.keys(
+                "author",
+                "title",
+                "article_id",
+                "topic",
+                "created_at",
+                "votes",
+                "comment_count"
+              );
+            });
+        });
+        it('GET status: 200, defaults response to be sorted by "created_at"', () => {
+          return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .expect(({ body: { articles } }) => {
+              expect(articles).to.be.descendingBy("created_at");
+            });
+        });
+        it("GET status: 200, articles can be sorted by other valid columns when passed in the query", () => {
+          return request(app)
+            .get("/api/articles?sort_by=votes")
+            .expect(200)
+            .expect(({ body: { articles } }) => {
+              expect(articles).to.be.descendingBy("votes");
+            });
+        });
+        it("GET status: 200, articles order defaults to descending", () => {
+          return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .expect(({ body: { articles } }) => {
+              expect(articles).to.be.descendingBy("created_at");
+            });
+        });
+        it("GET status: 200, articles order can be sorted by url order query", () => {
+          return request(app)
+            .get("/api/articles?order=asc")
+            .expect(200)
+            .expect(({ body: { articles } }) => {
+              expect(articles).to.be.ascendingBy("created_at");
+            });
+        });
+      });
       describe("/:article_id", () => {
         describe("GET", () => {
           it("GET status:200 - responds with article object - inc comment_count", () => {
@@ -208,6 +258,13 @@ describe("/", () => {
                 .expect(200)
                 .then(({ body }) => {
                   expect(body.comments.length).to.equal(13);
+                  expect(body.comments[0]).to.contain.keys(
+                    "comment_id",
+                    "author",
+                    "article_id",
+                    "votes",
+                    "body"
+                  );
                 });
             });
             it("GET status: 200, defaults the response to be sorted by 'created_at' ", () => {
@@ -215,7 +272,57 @@ describe("/", () => {
                 .get("/api/articles/1/comments")
                 .expect(200)
                 .then(({ body: { comments } }) => {
-                  expect(comments).to.be.sortedBy("created_at");
+                  expect(comments).to.be.descendingBy("created_at");
+                });
+            });
+            it("GET status: 200, comments can be sorted by other valid columns when passed in the query", () => {
+              return request(app)
+                .get("/api/articles/1/comments?sort_by=votes")
+                .expect(200)
+                .then(({ body: { comments } }) => {
+                  expect(comments).to.be.descendingBy("votes");
+                });
+            });
+            it("GET status: 200, comments order defaults to descending", () => {
+              return request(app)
+                .get("/api/articles/1/comments?sort_by=created_at")
+                .expect(200)
+                .then(({ body: { comments } }) => {
+                  expect(comments).to.be.descendingBy("created_at");
+                });
+            });
+            it("GET status: 200, comments order can be sorted by url order query", () => {
+              return request(app)
+                .get("/api/articles/1/comments?order=asc")
+                .expect(200)
+                .then(({ body: { comments } }) => {
+                  expect(comments).to.be.ascendingBy("created_at");
+                });
+            });
+            it("status: 404 - when given an article_id that does not exist", () => {
+              return request(app)
+                .get("/api/articles/987654321/comments")
+                .expect(404)
+                .then(({ body }) => {
+                  expect(body.msg).to.equal("article does not exist");
+                });
+            });
+            it("status: 400 - when given an invalid article_id", () => {
+              return request(app)
+                .get("/api/articles/notAnId/comments")
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body.msg).to.equal(
+                    'invalid input syntax for integer: "notAnId"'
+                  );
+                });
+            });
+            it("status: 400 - when sort_by query is a column that does not exist ", () => {
+              return request(app)
+                .get("/api/articles/1/comments?sort_by=colour")
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body.msg).to.eql('column "colour" does not exist');
                 });
             });
           });
