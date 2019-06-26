@@ -2,7 +2,8 @@ const {
   selectByArticleId,
   updateArticleById,
   postComment,
-  selectAllCommentsByArticleId
+  selectAllCommentsByArticleId,
+  selectAllArticles
 } = require("../models/articles-models");
 
 exports.sendByArticleId = (req, res, next) => {
@@ -26,7 +27,6 @@ exports.patchArticlceById = (req, res, next) => {
   const { inc_votes } = req.body;
   if (!inc_votes)
     res.status(400).send({ msg: "no inc_vote key on request body" });
-  //feel like this isn't where to do this? or not the best way to?
   else {
     updateArticleById(article_id, inc_votes)
       .then(([article]) => {
@@ -65,9 +65,20 @@ exports.postCommentByArticleId = (req, res, next) => {
 
 exports.sendCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  selectAllCommentsByArticleId(article_id)
+  selectAllCommentsByArticleId(article_id, req.query)
     .then(comments => {
-      res.status(200).send({ comments });
+      if (!comments.length)
+        return Promise.reject({
+          status: 404,
+          msg: "article does not exist"
+        });
+      else res.status(200).send({ comments });
     })
-    .catch(err => console.log(err));
+    .catch(err => next(err));
+};
+
+exports.sendAllArticles = (req, res, next) => {
+  selectAllArticles(req.query).then(articles => {
+    res.status(200).send({ articles });
+  });
 };
