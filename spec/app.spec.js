@@ -116,6 +116,30 @@ describe("/", () => {
               expect(articles[0].topic).to.equal("mitch");
             });
         });
+        it("status: 400 - when sort_by query is a column that does not exist", () => {
+          return request(app)
+            .get("/api/articles?sort_by=notAColumn")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal('column "notAColumn" does not exist');
+            });
+        });
+        it("status: 404 - when passed a username that does not exist ", () => {
+          return request(app)
+            .get("/api/articles?author=notAUsername")
+            .expect(404)
+            .expect(({ body }) => {
+              expect(body.msg).to.equal("resource not found");
+            });
+        });
+        it("status: 404 - when passed a topic that does not exist ", () => {
+          return request(app)
+            .get("/api/articles?topic=notATopic")
+            .expect(404)
+            .expect(({ body }) => {
+              expect(body.msg).to.equal("resource not found");
+            });
+        });
       });
       describe("/:article_id", () => {
         describe("GET", () => {
@@ -264,7 +288,7 @@ describe("/", () => {
                 .expect(400)
                 .then(({ body }) => {
                   expect(body.msg).to.equal(
-                    "no username/body key on comment post request"
+                    'null value in column "author" violates not-null constraint'
                   );
                 });
             });
@@ -340,7 +364,7 @@ describe("/", () => {
                 .get("/api/articles/1/comments?sort_by=colour")
                 .expect(400)
                 .then(({ body }) => {
-                  expect(body.msg).to.eql('column "colour" does not exist');
+                  expect(body.msg).to.equal('column "colour" does not exist');
                 });
             });
           });
