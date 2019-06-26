@@ -78,7 +78,9 @@ exports.sendCommentsByArticleId = (req, res, next) => {
 };
 
 exports.sendAllArticles = (req, res, next) => {
-  selectAllArticles(req.query).then(articles => {
-    res.status(200).send({ articles });
-  });
+  selectAllArticles(req.query)
+    .then(articles => {
+      res.status(200).send({ articles });
+    })
+    .catch(err => console.log(err));
 };

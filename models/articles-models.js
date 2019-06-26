@@ -35,7 +35,12 @@ exports.selectAllCommentsByArticleId = (
     .then(comments => comments);
 };
 
-exports.selectAllArticles = ({ sort_by = "created_at", order = "desc" }) => {
+exports.selectAllArticles = ({
+  sort_by = "created_at",
+  order = "desc",
+  author,
+  topic
+}) => {
   return connection("articles")
     .select(
       "articles.author",
@@ -49,5 +54,13 @@ exports.selectAllArticles = ({ sort_by = "created_at", order = "desc" }) => {
     .leftJoin("comments", "comments.article_id", "articles.article_id")
     .groupBy("articles.article_id")
     .orderBy(sort_by, order)
+    .modify(queryBuilder => {
+      if (author) {
+        queryBuilder.where("articles.author", author);
+      }
+      if (topic) {
+        queryBuilder.where("articles.topic", topic);
+      }
+    })
     .then(articles => articles);
 };

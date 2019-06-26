@@ -98,6 +98,24 @@ describe("/", () => {
               expect(articles).to.be.ascendingBy("created_at");
             });
         });
+        it("GET status:200, articles can be filtered by author when valid username passed as query", () => {
+          return request(app)
+            .get("/api/articles?author=butter_bridge")
+            .expect(200)
+            .expect(({ body: { articles } }) => {
+              expect(articles.length).to.equal(3);
+              expect(articles[0].author).to.equal("butter_bridge");
+            });
+        });
+        it("GET status:200, articles can be filtered by topic when valid topic is passed as query", () => {
+          return request(app)
+            .get("/api/articles?topic=mitch")
+            .expect(200)
+            .expect(({ body: { articles } }) => {
+              expect(articles.length).to.equal(11);
+              expect(articles[0].topic).to.equal("mitch");
+            });
+        });
       });
       describe("/:article_id", () => {
         describe("GET", () => {
