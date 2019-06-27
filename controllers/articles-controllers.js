@@ -3,7 +3,8 @@ const {
   updateArticleById,
   postComment,
   selectAllCommentsByArticleId,
-  selectAllArticles
+  selectAllArticles,
+  checkExists
 } = require("../models/articles-models");
 
 exports.sendByArticleId = (req, res, next) => {
@@ -77,10 +78,33 @@ exports.sendCommentsByArticleId = (req, res, next) => {
     .catch(err => next(err));
 };
 
+// exports.sendAllArticles = (req, res, next) => {
+//   selectAllArticles(req.query)
+//     .then(articles => {
+//       if (!articles.length)
+//         return Promise.reject({
+//           status: 404,
+//           msg: "resource not found"
+//         });
+//       else res.status(200).send({ articles });
+//     })
+//     .catch(err => next(err));
+// };
+
 exports.sendAllArticles = (req, res, next) => {
+  const { author, topic } = req.query;
   selectAllArticles(req.query)
     .then(articles => {
-      if (!articles.length)
+      checkAuthorExists = author
+        ? checkExists(author, "users", "username")
+        : null;
+
+      checkTopicExists = topic ? checkExists(topic, "topics", "slug") : null;
+
+      return Promise.all([checkAuthorExists, checkTopicExists, articles]);
+    })
+    .then(([authorExists, topicExists, articles]) => {
+      if (authorExists === false || topicExists === false)
         return Promise.reject({
           status: 404,
           msg: "resource not found"
