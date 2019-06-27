@@ -1,4 +1,7 @@
-const { updateCommentById } = require("../models/comments-models");
+const {
+  updateCommentById,
+  removeComment
+} = require("../models/comments-models");
 
 exports.patchCommentById = (req, res, next) => {
   const { comment_id } = req.params;
@@ -17,4 +20,18 @@ exports.patchCommentById = (req, res, next) => {
       })
       .catch(err => next(err));
   }
+};
+
+exports.deleteCommentById = (req, res, next) => {
+  const { comment_id } = req.params;
+  removeComment(comment_id)
+    .then(delCount => {
+      if (delCount === 1) res.sendStatus(204);
+      else if (delCount === 0)
+        return Promise.reject({
+          status: 404,
+          msg: "no comment with that comment_id found"
+        });
+    })
+    .catch(err => next(err));
 };

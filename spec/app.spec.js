@@ -424,6 +424,31 @@ describe("/", () => {
               });
           });
         });
+        describe("DELETE", () => {
+          it("DELETE status: 204 - responds with no content, when passed a valid comment_id", () => {
+            return request(app)
+              .delete("/api/comments/1")
+              .expect(204);
+          });
+          it("status: 404 - when passed an inexistent comment_id", () => {
+            return request(app)
+              .delete("/api/comments/987654321")
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  "no comment with that comment_id found"
+                );
+              });
+          });
+          it("status: 400 - when passed an invalid comment_id", () => {
+            return request(app)
+              .delete("/api/comments/notAnId")
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal('invalid input syntax for integer: "notAnId"');
+              });
+          });
+        });
       });
     });
   });
