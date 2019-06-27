@@ -371,5 +371,60 @@ describe("/", () => {
         });
       });
     });
+    describe("/comments", () => {
+      describe("/:comment_id", () => {
+        describe("PATCH", () => {
+          it("PATCH /:comment_id - 200 - updates the vote count", () => {
+            return request(app)
+              .patch("/api/comments/1")
+              .send({ inc_votes: 1 })
+              .expect(200)
+              .then(({ body: { comment } }) => {
+                expect(comment.votes).to.equal(17);
+              });
+          });
+          it("status 400 - no 'inc_votes' key on request body", () => {
+            return request(app)
+              .patch("/api/comments/1")
+              .send({})
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("no inc_vote key on request body");
+              });
+          });
+          it("status 400 - invalid inc_votes value", () => {
+            return request(app)
+              .patch("/api/comments/1")
+              .send({ inc_votes: "dog" })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  'invalid input syntax for integer: "NaN"'
+                );
+              });
+          });
+          it("status: 404 - when given an comment_id that does not exist", () => {
+            return request(app)
+              .patch("/api/comments/943789")
+              .send({ inc_votes: 1 })
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("comment does not exist");
+              });
+          });
+          it("status: 400 - when given an invalid comment_id", () => {
+            return request(app)
+              .patch("/api/comments/notAnId")
+              .send({ inc_votes: 1 })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  'invalid input syntax for integer: "notAnId"'
+                );
+              });
+          });
+        });
+      });
+    });
   });
 });
