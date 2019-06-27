@@ -15,7 +15,11 @@ exports.handleSqlErrors = (err, req, res, next) => {
 };
 
 exports.routeNotFound = (err, req, res, next) => {
-  res.status(404).send({ msg: "Route Not Found" });
+  res.status(404).send({ msg: "route not found" });
+};
+
+exports.sendMethodNotAllowed = (err, req, res) => {
+  res.status(405).send({ msg: "method not allowed" });
 };
 
 exports.handleServerError = (err, req, res, next) => {

@@ -4,10 +4,12 @@ const {
   patchCommentById,
   deleteCommentById
 } = require("../controllers/comments-controllers");
+const { sendMethodNotAllowed } = require("../errors/index");
 
 commentsRouter
   .route("/:comment_id")
   .patch(patchCommentById)
-  .delete(deleteCommentById);
+  .delete(deleteCommentById)
+  .all(sendMethodNotAllowed);
 
 module.exports = commentsRouter;
