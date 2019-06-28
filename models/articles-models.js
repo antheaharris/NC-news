@@ -9,7 +9,7 @@ exports.selectByArticleId = article_id => {
     .where({ "articles.article_id": article_id });
 };
 
-exports.updateArticleById = (article_id, inc_votes) => {
+exports.updateArticleById = (article_id, inc_votes = 0) => {
   return connection("articles")
     .where({ "articles.article_id": article_id })
     .increment("votes", inc_votes)

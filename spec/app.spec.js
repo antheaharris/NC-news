@@ -206,13 +206,13 @@ describe("/", () => {
                 expect(article.votes).to.equal(101);
               });
           });
-          it("status 400 - no 'inc_votes' key on request body", () => {
+          it("status 200 - responds with unchanged article if no 'inc_votes' key on request body", () => {
             return request(app)
               .patch("/api/articles/1")
               .send({})
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.msg).to.equal("no inc_vote key on request body");
+              .expect(200)
+              .then(({ body: { article } }) => {
+                expect(article.votes).to.equal(100);
               });
           });
           it("status 400 - invalid inc_votes value", () => {
@@ -314,15 +314,22 @@ describe("/", () => {
               return request(app)
                 .get("/api/articles/1/comments")
                 .expect(200)
-                .then(({ body }) => {
-                  expect(body.comments.length).to.equal(13);
-                  expect(body.comments[0]).to.contain.keys(
+                .then(({ body: { comments } }) => {
+                  expect(comments[0]).to.contain.keys(
                     "comment_id",
                     "author",
                     "article_id",
                     "votes",
                     "body"
                   );
+                });
+            });
+            it("GET status: 200, responds with empty array if article exists but has no comments", () => {
+              return request(app)
+                .get("/api/articles/2/comments")
+                .expect(200)
+                .then(({ body: { comments } }) => {
+                  expect(comments).to.eql([]);
                 });
             });
             it("GET status: 200, defaults the response to be sorted by 'created_at' ", () => {
@@ -399,13 +406,13 @@ describe("/", () => {
                 expect(comment.votes).to.equal(17);
               });
           });
-          it("status 400 - no 'inc_votes' key on request body", () => {
+          it("status 200 - no 'inc_votes' key on request body", () => {
             return request(app)
               .patch("/api/comments/1")
               .send({})
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.msg).to.equal("no inc_vote key on request body");
+              .expect(200)
+              .then(({ body: { comment } }) => {
+                expect(comment.votes).to.equal(16);
               });
           });
           it("status 400 - invalid inc_votes value", () => {

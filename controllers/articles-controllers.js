@@ -26,22 +26,25 @@ exports.sendByArticleId = (req, res, next) => {
 exports.patchArticlceById = (req, res, next) => {
   const { article_id } = req.params;
   const { inc_votes } = req.body;
-  if (!inc_votes)
-    res.status(400).send({ msg: "no inc_vote key on request body" });
-  else {
-    updateArticleById(article_id, inc_votes)
-      .then(([article]) => {
-        if (!article)
-          return Promise.reject({
-            status: 404,
-            msg: "article does not exist"
-          });
-        else res.status(200).send({ article });
-      })
-      .catch(err => {
-        next(err);
-      });
-  }
+
+  updateArticleById(article_id, inc_votes)
+    .then(([article]) => {
+      const articleExists = article_id
+        ? checkExists(article_id, "articles", "article_id")
+        : null;
+      return Promise.all([articleExists, article]);
+    })
+    .then(([articleExists, article]) => {
+      if (articleExists === false)
+        return Promise.reject({
+          status: 404,
+          msg: "article does not exist"
+        });
+      else res.status(200).send({ article });
+    })
+    .catch(err => {
+      next(err);
+    });
 };
 
 exports.postCommentByArticleId = (req, res, next) => {
@@ -77,19 +80,6 @@ exports.sendCommentsByArticleId = (req, res, next) => {
     })
     .catch(err => next(err));
 };
-
-// exports.sendAllArticles = (req, res, next) => {
-//   selectAllArticles(req.query)
-//     .then(articles => {
-//       if (!articles.length)
-//         return Promise.reject({
-//           status: 404,
-//           msg: "resource not found"
-//         });
-//       else res.status(200).send({ articles });
-//     })
-//     .catch(err => next(err));
-// };
 
 exports.sendAllArticles = (req, res, next) => {
   const { author, topic } = req.query;
