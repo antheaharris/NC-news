@@ -71,7 +71,14 @@ exports.sendCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   selectAllCommentsByArticleId(article_id, req.query)
     .then(comments => {
-      if (!comments.length)
+      const articleExists = article_id
+        ? checkExists(article_id, "articles", "article_id")
+        : null;
+
+      return Promise.all([articleExists, comments]);
+    })
+    .then(([articleExists, comments]) => {
+      if (articleExists === false)
         return Promise.reject({
           status: 404,
           msg: "article does not exist"
