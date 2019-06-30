@@ -4,9 +4,9 @@ const { formatDate, makeRefObj, formatComments } = require("../db/utils/utils");
 describe("formatDate", () => {
   it("returns an unmutated empty array, when passed an empty array", () => {
     const input = [{}];
-    const actualOutput = formatDate(input);
+    formatDate(input);
     const expectedOutput = [{}];
-    expect(actualOutput).to.not.eql(expectedOutput);
+    expect(input).to.not.eql(expectedOutput);
   });
   it("passed an array with one article obj, returns with the timestamp formatted as a date", () => {
     const input = [{ created_at: 1502921310430 }];
