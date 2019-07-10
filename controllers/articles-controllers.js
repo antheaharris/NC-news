@@ -50,9 +50,8 @@ exports.patchArticlceById = (req, res, next) => {
 exports.postCommentByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   const { username, body } = req.body;
-  const author = username;
-  delete username;
-  const newComment = { author, body };
+
+  const newComment = { author: username, body };
   postComment(article_id, newComment)
     .then(comment => {
       if (!comment.article_id)
