@@ -30,6 +30,7 @@
   "dependencies": {
     "chai": "^4.2.0",
     "chai-sorted": "^0.2.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "knex": "^0.17.6",
     "lodash": "^4.17.14",
